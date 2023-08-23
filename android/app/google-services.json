@@ -22,6 +22,14 @@
           }
         },
         {
+          "client_id": "758769434670-tk6m1ae2ck5ovs3ehtksqkh3fhqdcu73.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.hopandmove",
+            "certificate_hash": "3edd72ecf216a0a55d1187837cbd5e5b54c700ff"
+          }
+        },
+        {
           "client_id": "758769434670-rofv01sbepkd7o1j75ma8sfvamlth7at.apps.googleusercontent.com",
           "client_type": 3
         }

@@ -1,24 +1,46 @@
 import 'package:app/pages/Home.dart';
+import 'package:app/pages/Login.dart';
 import 'package:app/pages/Newuser.dart';
 import 'package:app/pages/getstarted.dart';
+import 'package:easy_loader/easy_loader.dart';
 import 'package:flutter/material.dart';
 import 'package:animated_splash_screen/animated_splash_screen.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:hive/hive.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  await Hive.initFlutter();
+  await Hive.openBox('Data');
 
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  // This widget is the root of your application.
+class MyApp extends StatefulWidget {
   @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
+  late final Box box;
+
+  @override
+  void initState() {
+    box = Hive.box('Data');
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    Hive.close();
+    super.dispose();
+  }
+
   Widget build(BuildContext context) {
     double Width = MediaQuery.of(context).size.width;
     double Height = MediaQuery.of(context).size.height;
@@ -34,10 +56,12 @@ class MyApp extends StatelessWidget {
         home: StreamBuilder(
           stream: FirebaseAuth.instance.authStateChanges(),
           builder: (ctx, userSnapshot) {
+            var Aubool = box.get('AU') ?? false;
+
             if (userSnapshot.hasData) {
-              return Newuser();
+              return Newuser(UID: userSnapshot.data!.uid);
             } else if (userSnapshot.hasError) {
-              return CircularProgressIndicator();
+              return EasyLoader(image: AssetImage('assets/logo.png'));
             }
             return AnimatedSplashScreen(
               duration: 3000,
@@ -48,7 +72,7 @@ class MyApp extends StatelessWidget {
                   'assets/logo.png',
                 ),
               ),
-              nextScreen: Getstarted(),
+              nextScreen: Aubool ? Login() : Getstarted(),
               splashTransition: SplashTransition.scaleTransition,
               pageTransitionType: PageTransitionType.fade,
             );

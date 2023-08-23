@@ -1,13 +1,18 @@
 import 'dart:developer';
 import 'dart:io';
+import 'package:app/main.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_loader/easy_loader.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:animated_notch_bottom_bar/animated_notch_bottom_bar/animated_notch_bottom_bar.dart';
 import 'package:data_table_2/data_table_2.dart';
+import 'package:hive/hive.dart';
 
 class Home extends StatefulWidget {
-  const Home({super.key});
-
+  const Home({super.key, required this.UID});
+  final String UID;
   @override
   State<Home> createState() => _HomeState();
 }
@@ -16,11 +21,22 @@ class _HomeState extends State<Home> {
   final _pageController = PageController(initialPage: 0);
   final Color kDarkBlueColor = const Color(0xFF053149);
   final _controller = NotchBottomBarController(index: 0);
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  late final Map<String, dynamic> Data;
 
   int maxCount = 5;
+  @override
+  void initState() {
+    box = Hive.box('Data');
+    Data = box.get('data');
+    super.initState();
+  }
 
+  late final Box box;
   @override
   void dispose() {
+    Hive.close();
+
     _pageController.dispose();
     super.dispose();
   }
@@ -32,8 +48,12 @@ class _HomeState extends State<Home> {
     const Page4(),
     const Page5(),
   ];
+  bool _isloading = false;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
   @override
   Widget build(BuildContext context) {
+    print(Data);
     return Scaffold(
       appBar: AppBar(
         elevation: 5.0,
@@ -54,9 +74,20 @@ class _HomeState extends State<Home> {
                           fit: BoxFit.contain,
                         ),
                       )),
-                  Icon(
-                    Icons.logout_rounded,
+                  IconButton(
+                    icon: Icon(Icons.logout_rounded),
                     color: kDarkBlueColor,
+                    onPressed: () async {
+                      var box1 = await Hive.openBox('Data');
+                      await box1
+                          .deleteAll(['data', 'UB', 'uid']).then((value) async {
+                        await _auth.signOut().then((value) {
+                          box1.close();
+                          Navigator.pushReplacement(context,
+                              MaterialPageRoute(builder: (context) => MyApp()));
+                        });
+                      });
+                    },
                   )
                 ],
               ),
@@ -65,12 +96,14 @@ class _HomeState extends State<Home> {
         ],
         automaticallyImplyLeading: false,
       ),
-      body: PageView(
-        controller: _pageController,
-        physics: const NeverScrollableScrollPhysics(),
-        children: List.generate(
-            bottomBarPages.length, (index) => bottomBarPages[index]),
-      ),
+      body: _isloading
+          ? EasyLoader(image: AssetImage('assets/logo.png'))
+          : PageView(
+              controller: _pageController,
+              physics: const NeverScrollableScrollPhysics(),
+              children: List.generate(
+                  bottomBarPages.length, (index) => bottomBarPages[index]),
+            ),
       extendBody: true,
       bottomNavigationBar: (bottomBarPages.length <= maxCount)
           ? AnimatedNotchBottomBar(
