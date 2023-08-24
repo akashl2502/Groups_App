@@ -5,6 +5,7 @@ import 'package:app/pages/Home.dart';
 import 'package:app/pages/Newuser.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:lottie/lottie.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:otp_fields/otp_fields.dart';
@@ -27,7 +28,19 @@ class _LoginState extends State<Login> {
   String OTP = '';
   bool _Isloading = false;
   final FirebaseAuth _auth = FirebaseAuth.instance;
+
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  void initState() {
+    box = Hive.box('Data');
+    super.initState();
+  }
+
+  late final Box box;
+  @override
+  void dispose() {
+    Hive.close();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -267,6 +280,7 @@ class _LoginState extends State<Login> {
           },
           codeSent: (verificationId, forceResendingToken) {
             setState(() {
+              box.put('num', phonenumber);
               _Isloading = false;
               VID = verificationId;
               _showPhoneNumberScreen = false;

@@ -1,3 +1,4 @@
+import 'package:app/Utils.dart';
 import 'package:app/pages/Home.dart';
 import 'package:app/pages/Login.dart';
 import 'package:app/pages/Newuser.dart';
@@ -10,6 +11,7 @@ import 'package:page_transition/page_transition.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:hive/hive.dart';
+import 'package:provider/provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,7 +19,12 @@ Future<void> main() async {
   await Hive.initFlutter();
   await Hive.openBox('Data');
 
-  runApp(MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => LoadingProvider(),
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatefulWidget {

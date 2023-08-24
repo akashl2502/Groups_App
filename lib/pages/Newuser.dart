@@ -18,6 +18,8 @@ class _NewuserState extends State<Newuser> {
   @override
   void initState() {
     box = Hive.box('Data');
+    Mobnum.text = box.get('num');
+
     Checkuser(uid: widget.UID);
     super.initState();
   }
@@ -40,13 +42,14 @@ class _NewuserState extends State<Newuser> {
   String Email = '';
   String MobNum = '';
   String Gstno = '';
+  TextEditingController Mobnum = new TextEditingController();
 
   Future<void> Checkuser({required uid}) async {
     CollectionReference _cat = _firestore.collection("Userdetails");
     Query query = _cat.where("uid", isEqualTo: uid);
     QuerySnapshot querySnapshot = await query.get();
     final _docData = querySnapshot.docs.map((doc) => doc.data()).toList();
-    
+
     if (_docData.isNotEmpty) {
       setState(() async {
         await box.put('AU', true);
@@ -155,6 +158,8 @@ class _NewuserState extends State<Newuser> {
                             child: TextField(
                               onChanged: (value) => {MobNum = value},
                               keyboardType: TextInputType.number,
+                              enabled: false,
+                              controller: Mobnum,
                               decoration: InputDecoration(
                                 labelText: 'Mobile Number',
                                 contentPadding: EdgeInsets.symmetric(
@@ -226,10 +231,11 @@ class _NewuserState extends State<Newuser> {
   }
 
   void Pushuserdata() {
+
     if (name.isNotEmpty &&
         Compname.isNotEmpty &&
         Email.isNotEmpty &&
-        MobNum.isNotEmpty &&
+        Mobnum.text.isNotEmpty &&
         Gstno.length == 15 &&
         dropdownvalue.isNotEmpty) {
       setState(() {
@@ -239,7 +245,7 @@ class _NewuserState extends State<Newuser> {
         'company': Compname,
         'email': Email,
         'gst': Gstno,
-        'mob': MobNum,
+        'mob': Mobnum.text,
         'name': name,
         'type': dropdownvalue,
         'uid': widget.UID
