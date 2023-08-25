@@ -1,7 +1,7 @@
 import 'package:app/Utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_loader/easy_loader.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 
@@ -42,7 +42,7 @@ class _NewuserState extends State<Newuser> {
   String Email = '';
   String MobNum = '';
   String Gstno = '';
-  TextEditingController Mobnum = new TextEditingController();
+  TextEditingController Mobnum = TextEditingController();
 
   Future<void> Checkuser({required uid}) async {
     CollectionReference _cat = _firestore.collection("Userdetails");
@@ -231,7 +231,6 @@ class _NewuserState extends State<Newuser> {
   }
 
   void Pushuserdata() {
-
     if (name.isNotEmpty &&
         Compname.isNotEmpty &&
         Email.isNotEmpty &&

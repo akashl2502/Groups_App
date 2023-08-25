@@ -1,5 +1,4 @@
 import 'package:app/Utils.dart';
-import 'package:app/pages/Home.dart';
 import 'package:app/pages/Newuser.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -190,7 +189,7 @@ class _LoginState extends State<Login> {
                               ),
                               SizedBox(height: 8),
                               InkWell(
-                                  child: new Text(
+                                  child: Text(
                                     'Resend !',
                                     style: TextStyle(
                                         color: Colors.red,

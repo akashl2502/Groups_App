@@ -16,6 +16,7 @@ import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 import 'package:provider/provider.dart';
 import 'dart:convert' as convert;
 import 'package:http/http.dart' as http;
+
 class Page2 extends StatefulWidget {
   const Page2({Key? key}) : super(key: key);
 
@@ -147,4 +148,3 @@ class _Page2State extends State<Page2> {
     );
   }
 }
-

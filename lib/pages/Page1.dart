@@ -11,11 +11,11 @@ import 'package:animated_notch_bottom_bar/animated_notch_bottom_bar/animated_not
 import 'package:data_table_2/data_table_2.dart';
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
-import 'package:flutter_progress_hud/flutter_progress_hud.dart';
-import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
+import 'package:flutter_advanced_drawer/flutter_advanced_drawer.dart';
 import 'package:provider/provider.dart';
 import 'dart:convert' as convert;
 import 'package:http/http.dart' as http;
+
 class Page1 extends StatefulWidget {
   const Page1({Key? key}) : super(key: key);
 
@@ -35,8 +35,8 @@ class _Page1State extends State<Page1> {
   String pincode = '';
   String city = '';
   String region = '';
-  TextEditingController _controller = new TextEditingController();
-  TextEditingController Region = new TextEditingController();
+  TextEditingController _controller = TextEditingController();
+  TextEditingController Region = TextEditingController();
 
   void Fetchlocation(
       {required pin, required loadingProvider, required context}) async {
@@ -61,65 +61,65 @@ class _Page1State extends State<Page1> {
     }
   }
 
+  final _advancedDrawerController = AdvancedDrawerController();
+
+  @override
   Widget build(BuildContext context) {
     final loadingProvider = Provider.of<LoadingProvider>(context);
 
     double width = MediaQuery.of(context).size.width;
     double height = MediaQuery.of(context).size.height;
-    return Container(
-        child: Padding(
-      padding: const EdgeInsets.only(top: 40),
-      child: loadingProvider.isLoading
-          ? Container()
-          : Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(
-                  "Welcome Back ! ",
-                  style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: kDarkBlueColor),
-                ),
-                SizedBox(
-                  height: 15,
-                ),
-                Text(
-                  "Please Enter ",
-                  style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.normal,
-                      color: Colors.grey),
-                ),
-                SizedBox(
-                  height: 20,
-                ),
-                Container(
-                  height: height * 0.55,
-                  width: width * 0.9,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8.0),
-                    color: Colors.blueGrey[50],
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.white.withOpacity(0.5),
-                        offset: Offset(-3, -3),
-                        blurRadius: 10,
-                        spreadRadius: 1,
-                      ),
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.25),
-                        offset: Offset(3, 3),
-                        blurRadius: 10,
-                        spreadRadius: 1,
-                      )
-                    ],
-                  ),
-                  child: SingleChildScrollView(
-                    controller: _scrollController,
-                    scrollDirection: Axis.vertical,
-                    child: Column(
+    return Scaffold(
+      resizeToAvoidBottomInset: false,
+      // appBar: AppBar(
+      //   leading: IconButton(
+      //     onPressed: _handleMenuButtonPressed,
+      //     icon: ValueListenableBuilder<AdvancedDrawerValue>(
+      //       valueListenable: _advancedDrawerController,
+      //       builder: (_, value, __) {
+      //         return AnimatedSwitcher(
+      //           duration: Duration(milliseconds: 250),
+      //           child: Icon(
+      //             value.visible ? Icons.clear : Icons.menu,
+      //             key: ValueKey<bool>(value.visible),
+      //           ),
+      //         );
+      //       },
+      //     ),
+      //   ),
+      // ),
+      body: SingleChildScrollView(
+        physics: BouncingScrollPhysics(),
+        child: Container(
+            child: Padding(
+          padding: const EdgeInsets.only(top: 40),
+          child: loadingProvider.isLoading
+              ? Container()
+              : Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Welcome Back ! ",
+                      style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: kDarkBlueColor),
+                    ),
+                    SizedBox(
+                      height: 15,
+                    ),
+                    Text(
+                      "Please Enter ",
+                      style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.normal,
+                          color: Colors.grey),
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    Column(
                       children: [
                         Padding(
                           padding: const EdgeInsets.all(25.0),
@@ -230,12 +230,21 @@ class _Page1State extends State<Page1> {
                           onPressed: () {},
                           child: Text("Submit"),
                         ),
+                        SizedBox(
+                          height: 300,
+                        ),
                       ],
                     ),
-                  ),
+                  ],
                 ),
-              ],
-            ),
-    ));
+        )),
+      ),
+    );
+  }
+
+  void _handleMenuButtonPressed() {
+    // NOTICE: Manage Advanced Drawer state through the Controller.
+    // _advancedDrawerController.value = AdvancedDrawerValue.visible();
+    _advancedDrawerController.showDrawer();
   }
 }

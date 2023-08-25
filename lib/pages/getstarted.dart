@@ -28,7 +28,6 @@ class _GetstartedState extends State<Getstarted> {
       finishButtonStyle: FinishButtonStyle(
         backgroundColor: kDarkBlueColor,
       ),
-   
       trailingFunction: () {
         Navigator.push(
           context,
@@ -41,12 +40,10 @@ class _GetstartedState extends State<Getstarted> {
       totalPage: 3,
       headerBackgroundColor: Colors.white,
       pageBackgroundColor: Colors.white,
-      
       background: [
         Image.asset(
           'assets/started1.png',
           height: 500,
-         
         ),
         Image.asset(
           'assets/started2.png',
@@ -55,7 +52,6 @@ class _GetstartedState extends State<Getstarted> {
         Image.asset(
           'assets/started3.png',
           height: 500,
-        
         ),
       ],
       speed: 1.8,

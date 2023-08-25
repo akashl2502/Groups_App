@@ -1,22 +1,14 @@
-import 'dart:developer';
-import 'dart:io';
 import 'package:app/Utils.dart';
 import 'package:app/main.dart';
 import 'package:app/pages/Page1.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:easy_loader/easy_loader.dart';
-import 'package:file_picker/file_picker.dart';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:animated_notch_bottom_bar/animated_notch_bottom_bar/animated_notch_bottom_bar.dart';
-import 'package:data_table_2/data_table_2.dart';
+import 'package:flutter_advanced_drawer/flutter_advanced_drawer.dart';
+
 import 'package:hive/hive.dart';
-import 'package:intl/intl.dart';
-import 'package:flutter_progress_hud/flutter_progress_hud.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 import 'package:provider/provider.dart';
-import 'dart:convert' as convert;
-import 'package:http/http.dart' as http;
 
 class Home extends StatefulWidget {
   const Home({super.key, required this.UID});
@@ -28,11 +20,10 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   final _pageController = PageController(initialPage: 0);
   final Color kDarkBlueColor = const Color(0xFF053149);
-  final _controller = NotchBottomBarController(index: 0);
+
   final FirebaseAuth _auth = FirebaseAuth.instance;
   late final Map<String, dynamic> Data;
-  bool _isimageloading = false;
-  bool _isstateloading = false;
+
   int maxCount = 5;
   @override
   void initState() {
@@ -50,62 +41,174 @@ class _HomeState extends State<Home> {
     super.dispose();
   }
 
-  bool _isloading = false;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
+  final _advancedDrawerController = AdvancedDrawerController();
   @override
   Widget build(BuildContext context) {
     final loadingProvider = Provider.of<LoadingProvider>(context);
 
     print(Data);
-    return ModalProgressHUD(
-      inAsyncCall: loadingProvider.isLoading,
-      child: Scaffold(
-          resizeToAvoidBottomInset: false,
-          appBar: AppBar(
-            elevation: 5.0,
-            actions: [
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 20, right: 20),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      CircleAvatar(
-                          backgroundColor: kDarkBlueColor,
-                          child: Padding(
-                            padding: const EdgeInsets.only(top: 3),
-                            child: Image.asset(
-                              'assets/logo.png',
-                              fit: BoxFit.contain,
-                            ),
-                          )),
-                      IconButton(
-                        icon: Icon(Icons.logout_rounded),
-                        color: kDarkBlueColor,
-                        onPressed: () async {
-                          var box1 = Hive.box('Data');
-                          await box1.deleteAll(['data', 'UB', 'uid']).then(
-                              (value) async {
-                            await _auth.signOut().then((value) {
-                              box1.close();
-                              Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => MyApp()));
-                            });
-                          });
-                        },
-                      )
-                    ],
+    return AdvancedDrawer(
+      backdrop: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Colors.blueGrey, Colors.blueGrey.withOpacity(0.2)],
+          ),
+        ),
+      ),
+      controller: _advancedDrawerController,
+      animationCurve: Curves.easeInOut,
+      animationDuration: const Duration(milliseconds: 300),
+      animateChildDecoration: true,
+      rtlOpening: false,
+      // openScale: 1.0,
+      disabledGestures: false,
+      childDecoration: const BoxDecoration(
+        // NOTICE: Uncomment if you want to add shadow behind the page.
+        // Keep in mind that it may cause animation jerks.
+        // boxShadow: <BoxShadow>[
+        //   BoxShadow(
+        //     color: Colors.black12,
+        //     blurRadius: 0.0,
+        //   ),
+        // ],
+        borderRadius: const BorderRadius.all(Radius.circular(16)),
+      ),
+      drawer: SafeArea(
+        child: Container(
+          child: ListTileTheme(
+            textColor: Colors.white,
+            iconColor: Colors.white,
+            child: Column(
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                Container(
+                  width: 128.0,
+                  height: 128.0,
+                  margin: const EdgeInsets.only(
+                    top: 24.0,
+                    bottom: 64.0,
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  decoration: BoxDecoration(
+                    color: Colors.black26,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Image.asset(
+                    'assets/logo.png',
                   ),
                 ),
-              )
-            ],
-            automaticallyImplyLeading: false,
+                ListTile(
+                  onTap: () {},
+                  leading: Icon(Icons.home),
+                  title: Text('Home'),
+                ),
+                ListTile(
+                  onTap: () {},
+                  leading: Icon(Icons.account_circle_rounded),
+                  title: Text('Profile'),
+                ),
+                ListTile(
+                  onTap: () {},
+                  leading: Icon(Icons.favorite),
+                  title: Text('Favourites'),
+                ),
+                ListTile(
+                  onTap: () {},
+                  leading: Icon(Icons.settings),
+                  title: Text('Settings'),
+                ),
+                Spacer(),
+                DefaultTextStyle(
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.white54,
+                  ),
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(
+                      vertical: 16.0,
+                    ),
+                    child: Text('Terms of Service | Privacy Policy'),
+                  ),
+                ),
+              ],
+            ),
           ),
-          body: Page1()),
+        ),
+      ),
+      child: ModalProgressHUD(
+        inAsyncCall: loadingProvider.isLoading,
+        child: Scaffold(
+            resizeToAvoidBottomInset: false,
+            appBar: AppBar(
+              leading: IconButton(
+                onPressed: _handleMenuButtonPressed,
+                icon: ValueListenableBuilder<AdvancedDrawerValue>(
+                  valueListenable: _advancedDrawerController,
+                  builder: (_, value, __) {
+                    return AnimatedSwitcher(
+                      duration: Duration(milliseconds: 250),
+                      child: Icon(
+                        value.visible ? Icons.clear : Icons.menu,
+                        key: ValueKey<bool>(value.visible),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              elevation: 5.0,
+              actions: [
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 20, right: 20),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        // CircleAvatar(
+                        //     backgroundColor: kDarkBlueColor,
+                        //     child: Padding(
+                        //       padding: const EdgeInsets.only(top: 3),
+                        //       child: Image.asset(
+                        //         'assets/logo.png',
+                        //         fit: BoxFit.contain,
+                        //       ),
+                        //     )),
+                        // IconButton(
+                        //   icon: Icon(Icons.logout_rounded),
+                        //   color: kDarkBlueColor,
+                        //   onPressed: () async {
+                        //     var box1 = Hive.box('Data');
+                        //     await box1.deleteAll(['data', 'UB', 'uid']).then(
+                        //         (value) async {
+                        //       await _auth.signOut().then((value) {
+                        //         box1.close();
+                        //         Navigator.pushReplacement(
+                        //             context,
+                        //             MaterialPageRoute(
+                        //                 builder: (context) => MyApp()));
+                        //       });
+                        //     });
+                        //   },
+                        // )
+                      ],
+                    ),
+                  ),
+                )
+              ],
+              automaticallyImplyLeading: false,
+            ),
+            body: Page1()),
+      ),
     );
+  }
+
+  void _handleMenuButtonPressed() {
+    // NOTICE: Manage Advanced Drawer state through the Controller.
+    // _advancedDrawerController.value = AdvancedDrawerValue.visible();
+    _advancedDrawerController.showDrawer();
   }
 }
