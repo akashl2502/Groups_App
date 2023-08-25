@@ -1,5 +1,3 @@
-// ignore_for_file: use_build_context_synchronously
-
 import 'package:app/Utils.dart';
 import 'package:app/pages/Home.dart';
 import 'package:app/pages/Newuser.dart';
