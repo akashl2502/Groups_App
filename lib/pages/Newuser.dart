@@ -24,17 +24,11 @@ class _NewuserState extends State<Newuser> {
     super.initState();
   }
 
-  @override
-  void dispose() {
-    Hive.close();
-    super.dispose();
-  }
-
   late final Box box;
 
   final Color kDarkBlueColor = const Color(0xFF053149);
   ScrollController _scrollController = ScrollController();
-  String dropdownvalue = 'Seller';
+  String dropdownvalue = 'seller';
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   bool _isloading = true;
   String name = '';
@@ -198,8 +192,8 @@ class _NewuserState extends State<Newuser> {
                                 });
                               },
                               items: <String>[
-                                'Seller',
-                                'Buyer'
+                                'seller',
+                                'buyer'
                               ].map<DropdownMenuItem<String>>((String value) {
                                 return DropdownMenuItem<String>(
                                   value: value,

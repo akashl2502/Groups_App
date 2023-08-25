@@ -35,7 +35,6 @@ class _LoginState extends State<Login> {
   late final Box box;
   @override
   void dispose() {
-    Hive.close();
     super.dispose();
   }
 

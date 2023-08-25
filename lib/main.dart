@@ -19,12 +19,7 @@ Future<void> main() async {
   await Hive.initFlutter();
   await Hive.openBox('Data');
 
-  runApp(
-    ChangeNotifierProvider(
-      create: (context) => LoadingProvider(),
-      child: MyApp(),
-    ),
-  );
+  runApp(MyApp());
 }
 
 class MyApp extends StatefulWidget {
@@ -40,12 +35,6 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     box = Hive.box('Data');
     super.initState();
-  }
-
-  @override
-  void dispose() {
-    Hive.close();
-    super.dispose();
   }
 
   Widget build(BuildContext context) {
