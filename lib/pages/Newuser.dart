@@ -1,4 +1,4 @@
-import 'package:app/Utils.dart';
+import 'package:Hopnmove/Utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_loader/easy_loader.dart';
 
@@ -19,7 +19,6 @@ class _NewuserState extends State<Newuser> {
   void initState() {
     box = Hive.box('Data');
     Mobnum.text = box.get('num');
-
     Checkuser(uid: widget.UID);
     super.initState();
   }
@@ -167,7 +166,7 @@ class _NewuserState extends State<Newuser> {
                             padding: const EdgeInsets.all(25.0),
                             child: TextField(
                               onChanged: (value) => {Gstno = value},
-                              keyboardType: TextInputType.number,
+                              keyboardType: TextInputType.name,
                               decoration: InputDecoration(
                                 labelText: 'GST No',
                                 contentPadding: EdgeInsets.symmetric(

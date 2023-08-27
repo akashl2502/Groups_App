@@ -1,8 +1,6 @@
-import 'package:app/Utils.dart';
-import 'package:app/pages/Home.dart';
-import 'package:app/pages/Login.dart';
-import 'package:app/pages/Newuser.dart';
-import 'package:app/pages/getstarted.dart';
+import 'package:Hopnmove/pages/Login.dart';
+import 'package:Hopnmove/pages/Newuser.dart';
+import 'package:Hopnmove/pages/getstarted.dart';
 import 'package:easy_loader/easy_loader.dart';
 import 'package:flutter/material.dart';
 import 'package:animated_splash_screen/animated_splash_screen.dart';
@@ -11,7 +9,6 @@ import 'package:page_transition/page_transition.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:hive/hive.dart';
-import 'package:provider/provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,15 +30,19 @@ class _MyAppState extends State<MyApp> {
 
   @override
   void initState() {
-    box = Hive.box('Data');
+    initializeBox();
     super.initState();
+  }
+
+  Future<void> initializeBox() async {
+    box = await Hive.openBox('Data');
   }
 
   Widget build(BuildContext context) {
     double Width = MediaQuery.of(context).size.width;
     double Height = MediaQuery.of(context).size.height;
     return MaterialApp(
-        title: 'Flutter Demo',
+        title: 'Hop and Move',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
             primarySwatch: Colors.blue,

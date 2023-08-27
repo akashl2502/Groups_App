@@ -1,5 +1,5 @@
-import 'package:app/Utils.dart';
-import 'package:app/pages/Newuser.dart';
+import 'package:Hopnmove/Utils.dart';
+import 'package:Hopnmove/pages/Newuser.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
@@ -194,10 +194,12 @@ class _LoginState extends State<Login> {
                                         color: Colors.red,
                                         decoration: TextDecoration.underline),
                                   ),
-                                  onTap: () => launch(
-                                      'https://docs.flutter.io/flutter/services/UrlLauncher-class.html')),
+                                  onTap: () {}),
                             ],
                           ),
+                          SizedBox(
+                            height: 100,
+                          )
                         ],
                       ),
                     )

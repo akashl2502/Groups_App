@@ -1,21 +1,11 @@
-import 'dart:developer';
 import 'dart:io';
-import 'package:app/Utils.dart';
-import 'package:app/main.dart';
+import 'package:Hopnmove/Utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:easy_loader/easy_loader.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:animated_notch_bottom_bar/animated_notch_bottom_bar/animated_notch_bottom_bar.dart';
-import 'package:data_table_2/data_table_2.dart';
-import 'package:hive/hive.dart';
-import 'package:intl/intl.dart';
-import 'package:flutter_progress_hud/flutter_progress_hud.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
-import 'package:provider/provider.dart';
-import 'dart:convert' as convert;
-import 'package:http/http.dart' as http;
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class Page2 extends StatefulWidget {
   const Page2({required this.uid});
@@ -25,32 +15,127 @@ class Page2 extends StatefulWidget {
 }
 
 class _Page2State extends State<Page2> {
-  int? _editingRow;
+  bool _isloading = false;
 
-  File? _selectedFile;
-  void _pickFile() async {
-    try {
-      FilePickerResult? result = await FilePicker.platform.pickFiles();
+  final FBstorage = FirebaseStorage.instance.ref();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-      if (result != null) {
+  bool delcon = false;
+  void _pickFile({required filename, required docid, required context}) async {
+    PermissionStatus permissionStatus = await Permission.storage.request();
+
+    if (permissionStatus.isGranted) {
+      try {
+        FilePickerResult? result = await FilePicker.platform.pickFiles();
+
+        if (result != null) {
+          setState(() {
+            _isloading = true;
+          });
+          File selectedFile = File(result.files.single.path!);
+
+          Reference storageRef = FBstorage.child(
+              'files/${DateTime.now().millisecondsSinceEpoch}.pdf');
+
+          await storageRef.putFile(selectedFile);
+
+          String downloadURL = await storageRef.getDownloadURL();
+          await _firestore
+              .collection('orderdetails')
+              .doc(docid)
+              .update({filename: downloadURL}).then((value) {
+            setState(() {
+              _isloading = false;
+            });
+            ShowSnackbar(context, 'Document Successfully Added');
+          });
+        }
+      } catch (e) {
+        print(e);
         setState(() {
-          _selectedFile = File(result.files.single.path!);
+          _isloading = false;
         });
-      } else {
-        // User canceled the picker
+        ShowSnackbar(context, e.toString());
       }
+    } else {
+      ShowSnackbar(context, 'storage access denied');
+    }
+  }
+
+  void showDeleteConfirmation(
+      BuildContext context, String docId, file1, file2) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Delete Confirmation'),
+          content: SingleChildScrollView(
+            physics: BouncingScrollPhysics(),
+            child: Column(
+              children: [
+                Text('Are you sure you want to delete this request?'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+            ),
+            TextButton(
+              child: Text('Delete'),
+              onPressed: () async {
+                Navigator.of(context).pop();
+                setState(() {
+                  _isloading = true;
+                });
+                Deldata(context, docId, file1, file2);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> Deldata(BuildContext context, String docId, file1, file2) async {
+    try {
+      if (file1.toString().length != 0) {
+        Reference storageRef = FirebaseStorage.instance.refFromURL(file1);
+        await storageRef.delete();
+      }
+      if (file2.toString().length != 0) {
+        Reference storageRef = FirebaseStorage.instance.refFromURL(file2);
+        await storageRef.delete();
+      }
+      await _firestore
+          .collection('orderdetails')
+          .doc(docId)
+          .delete()
+          .then((value) {
+        setState(() {
+          _isloading = false;
+        });
+        ShowSnackbar(context, 'Data Successfully Deleted');
+      });
     } catch (e) {
-      print("Error picking file: $e");
+      print(e);
+      setState(() {
+        _isloading = false;
+      });
+      ShowSnackbar(context, 'Error in deleting requests');
     }
   }
 
   @override
-// Filter by UID
   Widget build(BuildContext context) {
     final Stream<QuerySnapshot<Map<String, dynamic>>> _ordersStream =
         FirebaseFirestore.instance
             .collection('orderdetails')
             .where('uid', isEqualTo: widget.uid)
+            .where('status', isEqualTo: 0)
             .snapshots();
     double width = MediaQuery.of(context).size.width;
     double height = MediaQuery.of(context).size.height;
@@ -58,9 +143,9 @@ class _Page2State extends State<Page2> {
       stream: _ordersStream,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(
-            child: EasyLoader(
-              image: AssetImage('assets/logo.png'),
+          return Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(),
             ),
           );
         } else if (snapshot.hasError) {
@@ -85,37 +170,104 @@ class _Page2State extends State<Page2> {
                 icon: Icon(Icons.arrow_back),
               )),
               body: Column(
-                children: [Center(child: Text('No data available.'))],
+                children: [Center(child: Text('No Request Available.'))],
               ));
           ;
         }
 
         final orderDocs = snapshot.data!.docs;
+        List<DataRow> dataRows = [];
 
-        return Scaffold(
-            appBar: AppBar(
-                leading: IconButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              icon: Icon(Icons.arrow_back),
-            )),
-            body: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.only(top: 50),
-                    child: Text(
-                      "Upcoming Records",
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
+        for (int index = 0; index < orderDocs.length; index++) {
+          final orderDoc = orderDocs[index];
+          final orderData = orderDoc.data() as Map<String, dynamic>;
+          print(orderData);
+
+          dataRows.add(DataRow(cells: [
+            DataCell(Text('${index + 1}')), // Displaying the index
+            DataCell(Text(orderData['dor'])),
+            DataCell(Text(orderData['product'])),
+            DataCell(Text(orderData['quantity'])),
+            DataCell(Text(orderData['dod'])),
+            DataCell(
+              Row(
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.upload_file),
+                    onPressed: () {
+                      _pickFile(
+                          filename: 'file1',
+                          context: context,
+                          docid: orderDoc.id);
+                    },
                   ),
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: DataTable(
-                        columns: [
+                  SizedBox(height: 20),
+                  Text(orderData['file1'].toString().length == 0
+                      ? 'No file Uploaded'
+                      : 'File Successfully Uploaded'),
+                ],
+              ),
+            ),
+            DataCell(
+              Row(
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.upload_file),
+                    onPressed: () {
+                      _pickFile(
+                          filename: 'file2',
+                          context: context,
+                          docid: orderDoc.id);
+                    },
+                  ),
+                  SizedBox(height: 20),
+                  Text(orderData['file2'].toString().length == 0
+                      ? 'No file Uploaded'
+                      : "File Successfully Uploaded"),
+                ],
+              ),
+            ),
+            DataCell(Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                IconButton(
+                  icon: Icon(Icons.delete),
+                  onPressed: () async {
+                    showDeleteConfirmation(context, orderDoc.id,
+                        orderData['file1'], orderData['file2']);
+                  },
+                )
+              ],
+            )),
+          ]));
+        }
+        return ModalProgressHUD(
+          inAsyncCall: _isloading,
+          child: Scaffold(
+              resizeToAvoidBottomInset: false,
+              appBar: AppBar(
+                  leading: IconButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                icon: Icon(Icons.arrow_back),
+              )),
+              body: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.only(top: 50),
+                      child: Text(
+                        "Upcoming Records",
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: DataTable(columns: [
                           DataColumn(
                             label: Text('Serial.No'),
                           ),
@@ -140,69 +292,12 @@ class _Page2State extends State<Page2> {
                           DataColumn(
                             label: Text('Action'),
                           ),
-                        ],
-                        rows: orderDocs.map((orderDoc) {
-                          final orderData =
-                              orderDoc.data() as Map<String, dynamic>;
-                          print(orderData);
-                          return DataRow(cells: [
-                            DataCell(Text('1')),
-                            DataCell(Text(orderData['dor'])),
-                            DataCell(Text(orderData['product'])),
-                            DataCell(Text(orderData['quantity'])),
-                            DataCell(Text(orderData['dod'])),
-                            DataCell(
-                              Row(
-                                children: [
-                                  IconButton(
-                                    icon: Icon(Icons.upload_file),
-                                    onPressed: _pickFile,
-                                  ),
-                                  SizedBox(height: 20),
-                                  Text(_selectedFile?.path ??
-                                      'No file selected'),
-                                ],
-                              ),
-                            ),
-                            DataCell(
-                              Row(
-                                children: [
-                                  IconButton(
-                                    icon: Icon(Icons.upload_file),
-                                    onPressed: _pickFile,
-                                  ),
-                                  SizedBox(height: 20),
-                                  Text(_selectedFile?.path ??
-                                      'No file selected'),
-                                ],
-                              ),
-                            ),
-                            DataCell(Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                IconButton(
-                                  icon: Icon(Icons.edit),
-                                  onPressed: () {
-                                    setState(() {
-                                      _editingRow =
-                                          0; // Assuming this is the first row, use appropriate index for others
-                                    });
-                                  },
-                                ),
-                                Icon(
-                                  Icons.delete,
-                                  size: 15,
-                                )
-                              ],
-                            )),
-                          ]);
-                        }).toList()),
-                  ),
-                  SizedBox(
-                    height: 30,
-                  )
-                ]));
+                        ], rows: dataRows)),
+                    SizedBox(
+                      height: 30,
+                    )
+                  ])),
+        );
       },
     );
   }

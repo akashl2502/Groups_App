@@ -1,21 +1,14 @@
 import 'dart:developer';
 import 'dart:io';
-import 'package:app/Utils.dart';
-import 'package:app/main.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:easy_loader/easy_loader.dart';
-import 'package:file_picker/file_picker.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:animated_notch_bottom_bar/animated_notch_bottom_bar/animated_notch_bottom_bar.dart';
-import 'package:data_table_2/data_table_2.dart';
-import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_advanced_drawer/flutter_advanced_drawer.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
-import 'package:provider/provider.dart';
 import 'dart:convert' as convert;
 import 'package:http/http.dart' as http;
+
+import '../Utils.dart';
 
 class Page1 extends StatefulWidget {
   const Page1({required this.uid});

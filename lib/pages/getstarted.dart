@@ -1,4 +1,4 @@
-import 'package:app/pages/Login.dart';
+import 'package:Hopnmove/pages/Login.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_onboarding_slider/flutter_onboarding_slider.dart';
 import 'package:flutter/cupertino.dart';

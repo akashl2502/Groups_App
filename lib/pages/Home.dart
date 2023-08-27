@@ -1,7 +1,9 @@
-import 'package:app/Utils.dart';
-import 'package:app/main.dart';
-import 'package:app/pages/Page1.dart';
-import 'package:app/pages/Page2.dart';
+import 'package:Hopnmove/Utils.dart';
+import 'package:Hopnmove/main.dart';
+import 'package:Hopnmove/pages/Page1.dart';
+import 'package:Hopnmove/pages/Page2.dart';
+import 'package:Hopnmove/pages/Page4.dart';
+import 'package:Hopnmove/pages/page3.dart';
 import 'package:easy_loader/easy_loader.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -36,6 +38,7 @@ class _HomeState extends State<Home> {
   Future<Box> openHiveBox() async {
     final box = await Hive.openBox('Data');
     Data = await box.get('data');
+
     return box;
   }
 
@@ -117,30 +120,52 @@ class _HomeState extends State<Home> {
                           'assets/logo.png',
                         ),
                       ),
+                      Data['type'] == 'seller'
+                          ? ListTile(
+                              onTap: () {},
+                              leading: Icon(Icons.home),
+                              title: Text('Home'),
+                            )
+                          : Container(),
+                      Data['type'] == 'seller'
+                          ? ListTile(
+                              onTap: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => Page2(
+                                              uid: box.get('uid'),
+                                            )));
+                              },
+                              leading: Icon(Icons.account_circle_rounded),
+                              title: Text('Upcoming '),
+                            )
+                          : Container(),
                       ListTile(
-                        onTap: () {},
-                        leading: Icon(Icons.home),
-                        title: Text('Home'),
+                        onTap: () {
+                          Data['type'] == 'seller'
+                              ? Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => Page3(
+                                            uid: box.get('uid'),
+                                            buyer: Data['type'] == 'buyer',
+                                          )))
+                              : null;
+                        },
+                        leading: Icon(Icons.favorite),
+                        title: Text('Inprogress '),
                       ),
                       ListTile(
                         onTap: () {
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => Page2(
+                                  builder: (context) => Page4(
                                         uid: box.get('uid'),
+                                        buyer: Data['type'] == 'buyer',
                                       )));
                         },
-                        leading: Icon(Icons.account_circle_rounded),
-                        title: Text('Upcoming '),
-                      ),
-                      ListTile(
-                        onTap: () {},
-                        leading: Icon(Icons.favorite),
-                        title: Text('Inprogress '),
-                      ),
-                      ListTile(
-                        onTap: () {},
                         leading: Icon(Icons.settings),
                         title: Text('Completed '),
                       ),
@@ -220,7 +245,12 @@ class _HomeState extends State<Home> {
                     ],
                     automaticallyImplyLeading: false,
                   ),
-                  body: Page1(uid: box.get('uid'))),
+                  body: Data['type'] == 'buyer'
+                      ? Page3(
+                          uid: box.get('uid'),
+                          buyer: Data['type'] == 'buyer',
+                        )
+                      : Page1(uid: box.get('uid'))),
             ),
           );
         });
